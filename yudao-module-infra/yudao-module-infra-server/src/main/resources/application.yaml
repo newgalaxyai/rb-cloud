@@ -1,9 +1,26 @@
+--- #################### 注册中心 + 配置中心相关配置 ####################
+spring:
+  cloud:
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:36.141.100.123:10010} # Nacos 服务器地址
+      username: ${NACOS_USERNAME:nacos} # Nacos 账号
+      password: ${NACOS_PASSWORD:glks2025122} # Nacos 密码
+      discovery: # 【配置中心】配置项
+        namespace: ${NACOS_NAMESPACE:dev} # 命名空间。这里使用 dev 开发环境
+        group: DEFAULT_GROUP # 使用的 Nacos 配置分组，默认为 DEFAULT_GROUP
+        metadata:
+          version: 1.0.0 # 服务实例的版本号，可用于灰度发布
+      config: # 【注册中心】配置项
+        namespace: ${spring.cloud.nacos.discovery.namespace} # 命名空间。这里使用 dev 开发环境
+        group: ${spring.cloud.nacos.discovery.group} # 使用的 Nacos 配置分组，默认为 DEFAULT_GROUP
+
+--- #################### 主要配置 ####################
 spring:
   application:
     name: infra-server
 
   profiles:
-    active: local
+    active: dev
 
   main:
     allow-circular-references: true # 允许循环依赖，因为项目是三层架构，无法避免这个情况。

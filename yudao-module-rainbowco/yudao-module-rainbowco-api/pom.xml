@@ -4,11 +4,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>cn.iocoder.cloud</groupId>
-        <artifactId>yudao-module-matrix</artifactId>
+        <artifactId>yudao-module-rainbowco</artifactId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>yudao-module-matrix-api</artifactId>
+    <artifactId>yudao-module-rainbowco-api</artifactId>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>

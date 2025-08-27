@@ -18,7 +18,7 @@ spring:
 --- #################### 主要配置 ####################
 spring:
   application:
-    name: matrix-server
+    name: rainbowco-server
 
   profiles:
     active: dev
@@ -183,7 +183,7 @@ yudao:
     delete-batch-enable: true # 是否生成批量删除接口
     unit-test-enable: false # 是否生成单元测试
   tenant: # 多租户相关配置项
-    enable: true
+    enable: false
     ignore-urls:
     ignore-tables:
 

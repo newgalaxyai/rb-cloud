@@ -24,6 +24,8 @@ public class UserProfileRespVO {
 
     @Schema(description = "用户邮箱", example = "yudao@iocoder.cn")
     private String email;
+    @Schema(description = "角色code")
+    private String roleCode;
 
     @Schema(description = "手机号码", example = "15601691300")
     private String mobile;
@@ -43,17 +45,17 @@ public class UserProfileRespVO {
     @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED, example = "时间戳格式")
     private LocalDateTime createTime;
 
-    /**
-     * 所属角色
-     */
-    private List<RoleSimpleRespVO> roles;
-    /**
-     * 所在部门
-     */
-    private DeptSimpleRespVO dept;
-    /**
-     * 所属岗位数组
-     */
-    private List<PostSimpleRespVO> posts;
+//    /**
+//     * 所属角色
+//     */
+//    private List<RoleSimpleRespVO> roles;
+//    /**
+//     * 所在部门
+//     */
+//    private DeptSimpleRespVO dept;
+//    /**
+//     * 所属岗位数组
+//     */
+//    private List<PostSimpleRespVO> posts;
 
 }

@@ -52,5 +52,13 @@ public interface UserConvert {
         userVO.setPosts(BeanUtils.toBean(posts, PostSimpleRespVO.class));
         return userVO;
     }
+    default UserProfileRespVO convert(AdminUserDO user, List<RoleDO> userRoles,
+                                      DeptDO dept, List<PostDO> posts) {
+        UserProfileRespVO userVO = BeanUtils.toBean(user, UserProfileRespVO.class);
+        userVO.setRoles(BeanUtils.toBean(userRoles, RoleSimpleRespVO.class));
+        userVO.setDept(BeanUtils.toBean(dept, DeptSimpleRespVO.class));
+        userVO.setPosts(BeanUtils.toBean(posts, PostSimpleRespVO.class));
+        return userVO;
+    }
 
 }

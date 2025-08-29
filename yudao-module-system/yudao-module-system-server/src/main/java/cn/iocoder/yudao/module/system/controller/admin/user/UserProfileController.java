@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.system.controller.admin.user;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
+import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.datapermission.core.annotation.DataPermission;
 import cn.iocoder.yudao.module.system.controller.admin.user.vo.profile.UserProfileRespVO;
 import cn.iocoder.yudao.module.system.controller.admin.user.vo.profile.UserProfileUpdatePasswordReqVO;
@@ -53,13 +54,14 @@ public class UserProfileController {
     public CommonResult<UserProfileRespVO> getUserProfile() {
         // 获得用户基本信息
         AdminUserDO user = userService.getUser(getLoginUserId());
+
         // 获得用户角色
-        List<RoleDO> userRoles = roleService.getRoleListFromCache(permissionService.getUserRoleIdListByUserId(user.getId()));
+//        List<RoleDO> userRoles = roleService.getRoleListFromCache(permissionService.getUserRoleIdListByUserId(user.getId()));
         // 获得部门信息
-        DeptDO dept = user.getDeptId() != null ? deptService.getDept(user.getDeptId()) : null;
+//        DeptDO dept = user.getDeptId() != null ? deptService.getDept(user.getDeptId()) : null;
         // 获得岗位信息
-        List<PostDO> posts = CollUtil.isNotEmpty(user.getPostIds()) ? postService.getPostList(user.getPostIds()) : null;
-        return success(UserConvert.INSTANCE.convert(user, userRoles, dept, posts));
+//        List<PostDO> posts = CollUtil.isNotEmpty(user.getPostIds()) ? postService.getPostList(user.getPostIds()) : null;
+        return success(BeanUtils.toBean(user, UserProfileRespVO.class));
     }
 
     @PutMapping("/update")

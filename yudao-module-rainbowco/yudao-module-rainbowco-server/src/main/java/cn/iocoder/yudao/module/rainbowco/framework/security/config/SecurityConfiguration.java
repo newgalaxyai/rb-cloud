@@ -11,13 +11,13 @@ import org.springframework.security.config.annotation.web.configurers.AuthorizeH
 /**
  * Infra 模块的 Security 配置
  */
-@Configuration(proxyBeanMethods = false, value = "infraSecurityConfiguration")
+@Configuration(proxyBeanMethods = false, value = "rainbowcoSecurityConfiguration")
 public class SecurityConfiguration {
 
     @Value("${spring.boot.admin.context-path:''}")
     private String adminSeverContextPath;
 
-    @Bean("matrixAuthorizeRequestsCustomizer")
+    @Bean("rainbowcoAuthorizeRequestsCustomizer")
     public AuthorizeRequestsCustomizer authorizeRequestsCustomizer() {
         return new AuthorizeRequestsCustomizer() {
 
@@ -37,7 +37,7 @@ public class SecurityConfiguration {
                 registry.requestMatchers(adminSeverContextPath).permitAll()
                         .requestMatchers(adminSeverContextPath + "/**").permitAll();
                 // 文件读取
-                registry.requestMatchers(buildAdminApi("/matrix/file/*/get/**")).permitAll();
+                registry.requestMatchers(buildAdminApi("/rainbowco/file/*/get/**")).permitAll();
 
                 // TODO 芋艿：这个每个项目都需要重复配置，得捉摸有没通用的方案
                 // RPC 服务的安全配置

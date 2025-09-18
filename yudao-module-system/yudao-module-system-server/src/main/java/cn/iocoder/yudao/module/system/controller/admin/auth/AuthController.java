@@ -64,7 +64,7 @@ public class AuthController {
 
     @PostMapping("/login")
     @PermitAll
-    @Operation(summary = "使用账号密码登录")
+    @Operation(summary = "使用手机号密码登录")
     public CommonResult<AuthLoginRespVO> login(@RequestBody @Valid AuthLoginReqVO reqVO) {
         return success(authService.login(reqVO));
     }

@@ -255,6 +255,8 @@ yudao:
 --- #################### 芋道相关配置 ####################
 
 yudao:
+  captcha:
+    enable: false # 本地环境，暂时关闭图片验证码，方便登录等接口的测试
   info:
     version: 1.0.0
     base-package: cn.iocoder.yudao

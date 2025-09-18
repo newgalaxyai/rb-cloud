@@ -26,7 +26,7 @@ public class AuthResetPasswordReqVO {
     @Mobile
     private String mobile;
 
-    @Schema(description = "手机短信验证码", requiredMode = Schema.RequiredMode.REQUIRED, example = "123456")
-    @NotEmpty(message = "手机手机短信验证码不能为空")
-    private String code;
+//    @Schema(description = "手机短信验证码", requiredMode = Schema.RequiredMode.REQUIRED, example = "123456")
+//    @NotEmpty(message = "手机手机短信验证码不能为空")
+//    private String code;
 }

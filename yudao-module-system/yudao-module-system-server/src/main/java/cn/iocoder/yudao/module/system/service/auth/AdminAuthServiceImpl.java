@@ -99,18 +99,46 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     @Override
     public AuthLoginRespVO login(AuthLoginReqVO reqVO) {
         // 校验验证码
-        validateCaptcha(reqVO);
+//        validateCaptcha(reqVO);
 
-        // 使用账号密码，进行登录
-        AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
+        // 使用手机号密码，进行登录
+        AdminUserDO user = authenticateByMobile(reqVO.getMobile(), reqVO.getPassword());
 
         // 如果 socialType 非空，说明需要绑定社交用户
-        if (reqVO.getSocialType() != null) {
-            socialUserService.bindSocialUser(new SocialUserBindReqDTO(user.getId(), getUserType().getValue(),
-                    reqVO.getSocialType(), reqVO.getSocialCode(), reqVO.getSocialState()));
-        }
+//        if (reqVO.getSocialType() != null) {
+//            socialUserService.bindSocialUser(new SocialUserBindReqDTO(user.getId(), getUserType().getValue(),
+//                    reqVO.getSocialType(), reqVO.getSocialCode(), reqVO.getSocialState()));
+//        }
         // 创建 Token 令牌，记录登录日志
-        return createTokenAfterLoginSuccess(user.getId(), reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME);
+        return createTokenAfterLoginSuccess(user.getId(), reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE);
+    }
+
+    /**
+     * 通过手机号和密码进行认证
+     *
+     * @param mobile 手机号
+     * @param mobile 手机号
+     * @param password 密码
+     * @return 用户信息
+     */
+    public AdminUserDO authenticateByMobile(String mobile, String password) {
+        final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_MOBILE;
+        // 校验手机号是否存在
+        AdminUserDO user = userService.getUserByMobile(mobile);
+        if (user == null) {
+            createLoginLog(null, mobile, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
+            throw exception(AUTH_LOGIN_BAD_CREDENTIALS);
+        }
+        if (!userService.isPasswordMatch(password, user.getPassword())) {
+            createLoginLog(user.getId(), mobile, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
+            throw exception(AUTH_LOGIN_BAD_CREDENTIALS);
+        }
+        // 校验是否禁用
+        if (CommonStatusEnum.isDisable(user.getStatus())) {
+            createLoginLog(user.getId(), mobile, logTypeEnum, LoginResultEnum.USER_DISABLED);
+            throw exception(AUTH_LOGIN_USER_DISABLED);
+        }
+        return user;
     }
 
     @Override
@@ -186,13 +214,13 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
     @VisibleForTesting
     void validateCaptcha(AuthLoginReqVO reqVO) {
-        ResponseModel response = doValidateCaptcha(reqVO);
+//        ResponseModel response = doValidateCaptcha(reqVO);
         // 校验验证码
-        if (!response.isSuccess()) {
-            // 创建登录失败日志（验证码不正确)
-            createLoginLog(null, reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME, LoginResultEnum.CAPTCHA_CODE_ERROR);
-            throw exception(AUTH_LOGIN_CAPTCHA_CODE_ERROR, response.getRepMsg());
-        }
+//        if (!response.isSuccess()) {
+//            // 创建登录失败日志（验证码不正确)
+//            createLoginLog(null, reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE, LoginResultEnum.CAPTCHA_CODE_ERROR);
+//            throw exception(AUTH_LOGIN_CAPTCHA_CODE_ERROR, response.getRepMsg());
+//        }
     }
 
     private ResponseModel doValidateCaptcha(CaptchaVerificationReqVO reqVO) {
@@ -291,12 +319,12 @@ public class AdminAuthServiceImpl implements AdminAuthService {
             throw exception(USER_MOBILE_NOT_EXISTS);
         }
 
-        smsCodeApi.useSmsCode(new SmsCodeUseReqDTO()
-                .setCode(reqVO.getCode())
-                .setMobile(reqVO.getMobile())
-                .setScene(SmsSceneEnum.ADMIN_MEMBER_RESET_PASSWORD.getScene())
-                .setUsedIp(getClientIP())
-        ).checkError();
+//        smsCodeApi.useSmsCode(new SmsCodeUseReqDTO()
+//                .setCode(reqVO.getCode())
+//                .setMobile(reqVO.getMobile())
+//                .setScene(SmsSceneEnum.ADMIN_MEMBER_RESET_PASSWORD.getScene())
+//                .setUsedIp(getClientIP())
+//        ).checkError();
 
         userService.updateUserPassword(userByMobile.getId(), reqVO.getPassword());
     }

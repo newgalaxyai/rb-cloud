@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.system.service.auth;
 import cn.hutool.core.util.ObjectUtil;
 import cn.iocoder.yudao.framework.common.enums.CommonStatusEnum;
 import cn.iocoder.yudao.framework.common.enums.UserTypeEnum;
+import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.monitor.TracerUtils;
 import cn.iocoder.yudao.framework.common.util.servlet.ServletUtils;
 import cn.iocoder.yudao.framework.common.util.validation.ValidationUtils;
@@ -12,6 +13,7 @@ import cn.iocoder.yudao.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
 import cn.iocoder.yudao.module.system.api.social.dto.SocialUserBindReqDTO;
 import cn.iocoder.yudao.module.system.api.social.dto.SocialUserRespDTO;
 import cn.iocoder.yudao.module.system.controller.admin.auth.vo.*;
+import cn.iocoder.yudao.module.system.controller.admin.oauth2.vo.token.OAuth2AccessTokenPageReqVO;
 import cn.iocoder.yudao.module.system.convert.auth.AuthConvert;
 import cn.iocoder.yudao.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import cn.iocoder.yudao.module.system.dal.dataobject.user.AdminUserDO;
@@ -314,18 +316,17 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void resetPassword(AuthResetPasswordReqVO reqVO) {
-        AdminUserDO userByMobile = userService.getUserByMobile(reqVO.getMobile());
-        if (userByMobile == null) {
+        //根据手机号查找用户
+        AdminUserDO user = userService.getUserByMobile(reqVO.getMobile());
+        if (user == null) {
+            // 与项目中现有风格保持一致，这里沿用“手机号不存在/用户不存在”的异常
             throw exception(USER_MOBILE_NOT_EXISTS);
         }
 
-//        smsCodeApi.useSmsCode(new SmsCodeUseReqDTO()
-//                .setCode(reqVO.getCode())
-//                .setMobile(reqVO.getMobile())
-//                .setScene(SmsSceneEnum.ADMIN_MEMBER_RESET_PASSWORD.getScene())
-//                .setUsedIp(getClientIP())
-//        ).checkError();
+        //校验旧密码（统一复用 userService 的校验逻辑，保证口令策略一致）
+        userService.validateOldPassword(user.getId(), reqVO.getOldPassword());
 
-        userService.updateUserPassword(userByMobile.getId(), reqVO.getPassword());
+        //更新密码（内部负责加密存储）
+        userService.updateUserPassword(user.getId(), reqVO.getPassword());
     }
 }

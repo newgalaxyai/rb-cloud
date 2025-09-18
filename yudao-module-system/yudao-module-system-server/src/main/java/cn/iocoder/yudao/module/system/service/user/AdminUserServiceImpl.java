@@ -446,7 +446,8 @@ public class AdminUserServiceImpl implements AdminUserService {
      * @param oldPassword 旧密码
      */
     @VisibleForTesting
-    void validateOldPassword(Long id, String oldPassword) {
+    @Override
+    public void validateOldPassword(Long id, String oldPassword) {
         AdminUserDO user = userMapper.selectById(id);
         if (user == null) {
             throw exception(USER_NOT_EXISTS);

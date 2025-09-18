@@ -214,4 +214,11 @@ public interface AdminUserService {
      */
     boolean isPasswordMatch(String rawPassword, String encodedPassword);
 
+    /**
+     * 校验旧密码是否匹配
+     * @param id 用户ID
+     * @param oldPassword 旧密码明文
+     * @throws cn.iocoder.yudao.framework.common.exception.ServiceException 不匹配或用户不存在时抛出
+     */
+    void validateOldPassword(Long id, String oldPassword);
 }

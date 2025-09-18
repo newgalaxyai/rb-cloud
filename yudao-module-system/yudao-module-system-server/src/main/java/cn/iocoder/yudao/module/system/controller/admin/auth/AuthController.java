@@ -144,8 +144,16 @@ public class AuthController {
     @PostMapping("/reset-password")
     @PermitAll
     @Operation(summary = "重置密码")
-    public CommonResult<Boolean> resetPassword(@RequestBody @Valid AuthResetPasswordReqVO reqVO) {
+    public CommonResult<Boolean> resetPassword(@RequestBody @Valid AuthResetPasswordReqVO reqVO,
+                                               HttpServletRequest request) {
+        // 先完成重置密码
         authService.resetPassword(reqVO);
+        // 模仿登出，从请求头或参数中取 token 并删除它（仅删除当前这次会话的 token）
+        String token = SecurityFrameworkUtils.obtainAuthorization(request,
+                securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
+        if (StrUtil.isNotBlank(token)) {
+            authService.logout(token, LoginLogTypeEnum.LOGOUT_DELETE.getType());
+        }
         return success(true);
     }
 

@@ -74,4 +74,9 @@ public class UserRespVO{
     private LocalDateTime createTime;
     @Schema(description = "角色code")
     private String roleCode;
+    /**
+     * 是否有下级账号 false 没有 true 有
+     */
+    @Schema(description = "是否有下级账号")
+    private Boolean hasChildren;
 }

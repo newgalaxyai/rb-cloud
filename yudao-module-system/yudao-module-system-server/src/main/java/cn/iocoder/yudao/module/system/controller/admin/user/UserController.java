@@ -95,15 +95,14 @@ public class UserController {
     @Operation(summary = "获得用户分页列表")
     public CommonResult<PageResult<UserRespVO>> getUserPage(@Valid UserPageReqVO pageReqVO) {
         // 获得用户分页列表
-        PageResult<AdminUserDO> pageResult = userService.getUserPage(pageReqVO);
+        PageResult<UserRespVO> pageResult = userService.getUserPage(pageReqVO);
         if (CollUtil.isEmpty(pageResult.getList())) {
             return success(new PageResult<>(pageResult.getTotal()));
         }
 //        // 拼接数据
 //        Map<Long, DeptDO> deptMap = deptService.getDeptMap(
 //                convertList(pageResult.getList(), AdminUserDO::getDeptId));
-        return success(new PageResult<>(BeanUtils.toBean(pageResult.getList(), UserRespVO.class),
-                pageResult.getTotal()));
+        return success(pageResult);
     }
 
 //    @GetMapping({"/list-all-simple", "/simple-list"})
@@ -129,20 +128,20 @@ public class UserController {
         return success(BeanUtils.toBean(user, UserRespVO.class));
     }
 
-    @GetMapping("/export-excel")
-    @Operation(summary = "导出用户")
-    @PreAuthorize("@ss.hasPermission('system:user:export')")
-    @ApiAccessLog(operateType = EXPORT)
-    public void exportUserList(@Validated UserPageReqVO exportReqVO,
-                               HttpServletResponse response) throws IOException {
-        exportReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<AdminUserDO> list = userService.getUserPage(exportReqVO).getList();
-        // 输出 Excel
-        Map<Long, DeptDO> deptMap = deptService.getDeptMap(
-                convertList(list, AdminUserDO::getDeptId));
-        ExcelUtils.write(response, "用户数据.xls", "数据", UserRespVO.class,
-                UserConvert.INSTANCE.convertList(list, deptMap));
-    }
+//    @GetMapping("/export-excel")
+//    @Operation(summary = "导出用户")
+//    @PreAuthorize("@ss.hasPermission('system:user:export')")
+//    @ApiAccessLog(operateType = EXPORT)
+//    public void exportUserList(@Validated UserPageReqVO exportReqVO,
+//                               HttpServletResponse response) throws IOException {
+//        exportReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
+//        List<AdminUserDO> list = userService.getUserPage(exportReqVO).getList();
+//        // 输出 Excel
+//        Map<Long, DeptDO> deptMap = deptService.getDeptMap(
+//                convertList(list, AdminUserDO::getDeptId));
+//        ExcelUtils.write(response, "用户数据.xls", "数据", UserRespVO.class,
+//                UserConvert.INSTANCE.convertList(list, deptMap));
+//    }
 
     @GetMapping("/get-import-template")
     @Operation(summary = "获得导入用户模板")

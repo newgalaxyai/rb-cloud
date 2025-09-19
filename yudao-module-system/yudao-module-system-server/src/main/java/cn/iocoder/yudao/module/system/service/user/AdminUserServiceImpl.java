@@ -11,14 +11,12 @@ import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.common.util.validation.ValidationUtils;
 import cn.iocoder.yudao.framework.datapermission.core.util.DataPermissionUtils;
+import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.module.infra.api.config.ConfigApi;
 import cn.iocoder.yudao.module.system.controller.admin.auth.vo.AuthRegisterReqVO;
 import cn.iocoder.yudao.module.system.controller.admin.user.vo.profile.UserProfileUpdatePasswordReqVO;
 import cn.iocoder.yudao.module.system.controller.admin.user.vo.profile.UserProfileUpdateReqVO;
-import cn.iocoder.yudao.module.system.controller.admin.user.vo.user.UserImportExcelVO;
-import cn.iocoder.yudao.module.system.controller.admin.user.vo.user.UserImportRespVO;
-import cn.iocoder.yudao.module.system.controller.admin.user.vo.user.UserPageReqVO;
-import cn.iocoder.yudao.module.system.controller.admin.user.vo.user.UserSaveReqVO;
+import cn.iocoder.yudao.module.system.controller.admin.user.vo.user.*;
 import cn.iocoder.yudao.module.system.dal.dataobject.dept.DeptDO;
 import cn.iocoder.yudao.module.system.dal.dataobject.dept.UserPostDO;
 import cn.iocoder.yudao.module.system.dal.dataobject.user.AdminUserDO;
@@ -42,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
@@ -282,15 +281,39 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public PageResult<AdminUserDO> getUserPage(UserPageReqVO reqVO) {
+    public PageResult<UserRespVO> getUserPage(UserPageReqVO reqVO) {
         // 如果有角色编号，查询角色对应的用户编号
 //        Set<Long> userIds = reqVO.getRoleId() != null ?
 //                permissionService.getUserRoleIdListByRoleId(singleton(reqVO.getRoleId())) : null;
         // 分页查询
-        log.info("【用户分页】开始查询，参数：{}", reqVO);
         PageResult<AdminUserDO> adminUserDOPageResult = userMapper.selectPage(reqVO);
-        log.info("【用户分页】查询结果：{}", adminUserDOPageResult);
-        return adminUserDOPageResult;
+//        log.info("【用户分页】查询结果：{}", adminUserDOPageResult);
+        List<UserRespVO> userRespVOList = BeanUtils.toBean(adminUserDOPageResult.getList(), UserRespVO.class);
+        if("super".equals(getLoginUserRoleCole())){
+            // 获取所有用户ID，用于批量查询下级账号
+            List<Long> userIds = userRespVOList.stream()
+                    .map(UserRespVO::getId)
+                    .collect(Collectors.toList());
+
+            // 批量查询所有用户的下级账号
+            List<AdminUserDO> allSubUsers = userMapper.selectList(
+                    new LambdaQueryWrapperX<AdminUserDO>()
+                            .in(AdminUserDO::getPid, userIds)
+            );
+
+            // 将下级账号按照pid分组
+            Map<Long, List<AdminUserDO>> subUserMap = allSubUsers.stream()
+                    .collect(Collectors.groupingBy(AdminUserDO::getPid));
+
+            // 为每个用户设置是否有下级账号
+            userRespVOList.forEach(userRespVO -> {
+                // 检查该用户是否有下级账号
+                boolean hasChildren = subUserMap.containsKey(userRespVO.getId()) &&
+                        !subUserMap.get(userRespVO.getId()).isEmpty();
+                userRespVO.setHasChildren(hasChildren);
+            });
+        }
+        return new PageResult<>(userRespVOList, adminUserDOPageResult.getTotal());
     }
 
     @Override

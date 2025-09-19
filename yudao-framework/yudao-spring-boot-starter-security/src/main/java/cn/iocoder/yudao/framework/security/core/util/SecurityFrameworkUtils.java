@@ -103,6 +103,16 @@ public class SecurityFrameworkUtils {
         LoginUser loginUser = getLoginUser();
         return loginUser != null ? MapUtil.getStr(loginUser.getInfo(), LoginUser.INFO_KEY_NICKNAME) : null;
     }
+    /**
+     * 获得当前用户的pid，从上下文中
+     *
+     * @return 部门编号
+     */
+    @Nullable
+    public static Long getLoginUserPid() {
+        LoginUser loginUser = getLoginUser();
+        return loginUser != null ? MapUtil.getLong(loginUser.getInfo(), LoginUser.INFO_KEY_PID) : null;
+    }
 
     /**
      * 获得当前用户的部门编号，从上下文中

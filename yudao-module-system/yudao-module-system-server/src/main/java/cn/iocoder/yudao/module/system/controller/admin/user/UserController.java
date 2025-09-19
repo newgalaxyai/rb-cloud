@@ -6,6 +6,7 @@ import cn.iocoder.yudao.framework.common.enums.CommonStatusEnum;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.controller.admin.user.vo.user.*;
 import cn.iocoder.yudao.module.system.convert.user.UserConvert;
@@ -105,22 +106,22 @@ public class UserController {
         if (CollUtil.isEmpty(pageResult.getList())) {
             return success(new PageResult<>(pageResult.getTotal()));
         }
-        // 拼接数据
-        Map<Long, DeptDO> deptMap = deptService.getDeptMap(
-                convertList(pageResult.getList(), AdminUserDO::getDeptId));
-        return success(new PageResult<>(UserConvert.INSTANCE.convertList(pageResult.getList(), deptMap),
+//        // 拼接数据
+//        Map<Long, DeptDO> deptMap = deptService.getDeptMap(
+//                convertList(pageResult.getList(), AdminUserDO::getDeptId));
+        return success(new PageResult<>(BeanUtils.toBean(pageResult.getList(), UserRespVO.class),
                 pageResult.getTotal()));
     }
 
-    @GetMapping({"/list-all-simple", "/simple-list"})
-    @Operation(summary = "获取用户精简信息列表", description = "只包含被开启的用户，主要用于前端的下拉选项")
-    public CommonResult<List<UserSimpleRespVO>> getSimpleUserList() {
-        List<AdminUserDO> list = userService.getUserListByStatus(CommonStatusEnum.ENABLE.getStatus());
-        // 拼接数据
-        Map<Long, DeptDO> deptMap = deptService.getDeptMap(
-                convertList(list, AdminUserDO::getDeptId));
-        return success(UserConvert.INSTANCE.convertSimpleList(list, deptMap));
-    }
+//    @GetMapping({"/list-all-simple", "/simple-list"})
+//    @Operation(summary = "获取用户精简信息列表", description = "只包含被开启的用户，主要用于前端的下拉选项")
+//    public CommonResult<List<UserSimpleRespVO>> getSimpleUserList() {
+//        List<AdminUserDO> list = userService.getUserListByStatus(CommonStatusEnum.ENABLE.getStatus());
+//        // 拼接数据
+//        Map<Long, DeptDO> deptMap = deptService.getDeptMap(
+//                convertList(list, AdminUserDO::getDeptId));
+//        return success(UserConvert.INSTANCE.convertSimpleList(list, deptMap));
+//    }
 
     @GetMapping("/get")
     @Operation(summary = "获得用户详情")

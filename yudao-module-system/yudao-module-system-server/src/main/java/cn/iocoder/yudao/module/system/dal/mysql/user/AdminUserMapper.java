@@ -10,6 +10,9 @@ import org.apache.ibatis.annotations.Mapper;
 import java.util.Collection;
 import java.util.List;
 
+import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
+import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.getLoginUserPid;
+
 @Mapper
 public interface AdminUserMapper extends BaseMapperX<AdminUserDO> {
 
@@ -35,6 +38,16 @@ public interface AdminUserMapper extends BaseMapperX<AdminUserDO> {
                 .inIfPresent(AdminUserDO::getId, userIds)
                 .orderByDesc(AdminUserDO::getId));
     }
+    default PageResult<AdminUserDO> selectPage(UserPageReqVO reqVO) {
+        return selectPage(reqVO, new LambdaQueryWrapperX<AdminUserDO>()
+                .eqIfPresent(AdminUserDO::getPid,getLoginUserId())
+                .likeIfPresent(AdminUserDO::getUsername, reqVO.getUsername())
+                .likeIfPresent(AdminUserDO::getMobile, reqVO.getMobile())
+                .eqIfPresent(AdminUserDO::getStatus, reqVO.getStatus())
+                .betweenIfPresent(AdminUserDO::getCreateTime, reqVO.getCreateTime())
+                .orderByDesc(AdminUserDO::getId));
+    }
+
 
     default List<AdminUserDO> selectListByNickname(String nickname) {
         return selectList(new LambdaQueryWrapperX<AdminUserDO>().like(AdminUserDO::getNickname, nickname));

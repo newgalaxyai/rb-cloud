@@ -96,5 +96,8 @@ public class AdminUserDO extends TenantBaseDO {
      * 角色code
      */
     private String roleCode;
-
+    /**
+     * 父id
+     */
+    private Long pid;
 }

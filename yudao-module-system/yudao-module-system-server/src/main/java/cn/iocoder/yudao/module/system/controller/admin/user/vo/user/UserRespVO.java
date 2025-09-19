@@ -31,14 +31,14 @@ public class UserRespVO{
     @Schema(description = "备注", example = "我是一个用户")
     private String remark;
 
-    @Schema(description = "部门ID", example = "我是一个用户")
-    private Long deptId;
-    @Schema(description = "部门名称", example = "IT 部")
-    @ExcelProperty("部门名称")
+//    @Schema(description = "部门ID", example = "我是一个用户")
+//    private Long deptId;
+//    @Schema(description = "部门名称", example = "IT 部")
+//    @ExcelProperty("部门名称")
     private String deptName;
 
-    @Schema(description = "岗位编号数组", example = "1")
-    private Set<Long> postIds;
+//    @Schema(description = "岗位编号数组", example = "1")
+//    private Set<Long> postIds;
 
     @Schema(description = "用户邮箱", example = "yudao@iocoder.cn")
     @ExcelProperty("用户邮箱")
@@ -56,7 +56,7 @@ public class UserRespVO{
     @Schema(description = "用户头像", example = "https://www.iocoder.cn/xxx.png")
     private String avatar;
 
-    @Schema(description = "状态，参见 CommonStatusEnum 枚举类", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    @Schema(description = "状态，0正常 1 禁用", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @ExcelProperty(value = "帐号状态", converter = DictConvert.class)
     @DictFormat(DictTypeConstants.COMMON_STATUS)
     private Integer status;
@@ -71,5 +71,6 @@ public class UserRespVO{
 
     @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED, example = "时间戳格式")
     private LocalDateTime createTime;
-
+    @Schema(description = "角色code")
+    private String roleCode;
 }

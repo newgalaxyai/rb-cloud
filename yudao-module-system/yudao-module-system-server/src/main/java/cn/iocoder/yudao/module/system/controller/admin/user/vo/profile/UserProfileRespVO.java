@@ -44,7 +44,11 @@ public class UserProfileRespVO {
 
     @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED, example = "时间戳格式")
     private LocalDateTime createTime;
-
+    /**
+     * 父id
+     */
+    @Schema(description = "父菜单编号", example = "1024")
+    private Long pid;
 //    /**
 //     * 所属角色
 //     */

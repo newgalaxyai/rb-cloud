@@ -45,6 +45,8 @@ import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
+import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
+import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.getLoginUserPid;
 import static cn.iocoder.yudao.module.system.enums.ErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.system.enums.LogRecordConstants.*;
 
@@ -87,13 +89,13 @@ public class AdminUserServiceImpl implements AdminUserService {
     @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_CREATE_SUB_TYPE, bizNo = "{{#user.id}}",
             success = SYSTEM_USER_CREATE_SUCCESS)
     public Long createUser(UserSaveReqVO createReqVO) {
-        // 1.1 校验账户配合
-        tenantService.handleTenantInfo(tenant -> {
-            long count = userMapper.selectCount();
-            if (count >= tenant.getAccountCount()) {
-                throw exception(USER_COUNT_MAX, tenant.getAccountCount());
-            }
-        });
+//        // 1.1 校验账户配合
+//        tenantService.handleTenantInfo(tenant -> {
+//            long count = userMapper.selectCount();
+//            if (count >= tenant.getAccountCount()) {
+//                throw exception(USER_COUNT_MAX, tenant.getAccountCount());
+//            }
+//        });
         // 1.2 校验正确性
         validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
                 createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds());
@@ -239,10 +241,10 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         // 2.1 删除用户
         userMapper.deleteById(id);
-        // 2.2 删除用户关联数据
-        permissionService.processUserDeleted(id);
-        // 2.2 删除用户岗位
-        userPostMapper.deleteByUserId(id);
+//        // 2.2 删除用户关联数据
+//        permissionService.processUserDeleted(id);
+//        // 2.2 删除用户岗位
+//        userPostMapper.deleteByUserId(id);
 
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable("user", user);
@@ -274,11 +276,10 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     public PageResult<AdminUserDO> getUserPage(UserPageReqVO reqVO) {
         // 如果有角色编号，查询角色对应的用户编号
-        Set<Long> userIds = reqVO.getRoleId() != null ?
-                permissionService.getUserRoleIdListByRoleId(singleton(reqVO.getRoleId())) : null;
-
+//        Set<Long> userIds = reqVO.getRoleId() != null ?
+//                permissionService.getUserRoleIdListByRoleId(singleton(reqVO.getRoleId())) : null;
         // 分页查询
-        return userMapper.selectPage(reqVO, getDeptCondition(reqVO.getDeptId()), userIds);
+        return userMapper.selectPage(reqVO);
     }
 
     @Override

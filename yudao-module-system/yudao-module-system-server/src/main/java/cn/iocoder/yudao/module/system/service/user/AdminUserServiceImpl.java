@@ -263,11 +263,11 @@ public class AdminUserServiceImpl implements AdminUserService {
         // 1. 批量删除用户
         userMapper.deleteByIds(ids);
 
-        // 2. 批量删除用户关联数据
-        ids.forEach(id -> {
-            permissionService.processUserDeleted(id);
-            userPostMapper.deleteByUserId(id);
-        });
+//        // 2. 批量删除用户关联数据
+//        ids.forEach(id -> {
+//            permissionService.processUserDeleted(id);
+//            userPostMapper.deleteByUserId(id);
+//        });
     }
 
     @Override

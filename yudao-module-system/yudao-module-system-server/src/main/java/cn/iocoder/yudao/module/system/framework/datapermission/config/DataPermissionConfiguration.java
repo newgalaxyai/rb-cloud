@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 public class DataPermissionConfiguration {
 
+    // 注释掉整个Bean来禁用数据权限
+    /*
     @Bean
     public DeptDataPermissionRuleCustomizer sysDeptDataPermissionRuleCustomizer() {
         return rule -> {
@@ -24,5 +26,6 @@ public class DataPermissionConfiguration {
             rule.addUserColumn(AdminUserDO.class, "id");
         };
     }
+    */
 
 }

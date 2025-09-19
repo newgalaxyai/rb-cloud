@@ -56,7 +56,6 @@ public class UserController {
 
     @PutMapping("update")
     @Operation(summary = "修改用户")
-    @PreAuthorize("@ss.hasPermission('system:user:update')")
     public CommonResult<Boolean> updateUser(@Valid @RequestBody UserSaveReqVO reqVO) {
         userService.updateUser(reqVO);
         return success(true);
@@ -65,7 +64,6 @@ public class UserController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除用户")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('system:user:delete')")
     public CommonResult<Boolean> deleteUser(@RequestParam("id") Long id) {
         userService.deleteUser(id);
         return success(true);
@@ -74,7 +72,6 @@ public class UserController {
     @DeleteMapping("/delete-list")
     @Parameter(name = "ids", description = "编号列表", required = true)
     @Operation(summary = "批量删除用户")
-    @PreAuthorize("@ss.hasPermission('system:user:delete')")
     public CommonResult<Boolean> deleteUserList(@RequestParam("ids") List<Long> ids) {
         userService.deleteUserList(ids);
         return success(true);
@@ -82,7 +79,6 @@ public class UserController {
 
     @PutMapping("/update-password")
     @Operation(summary = "重置用户密码")
-    @PreAuthorize("@ss.hasPermission('system:user:update-password')")
     public CommonResult<Boolean> updateUserPassword(@Valid @RequestBody UserUpdatePasswordReqVO reqVO) {
         userService.updateUserPassword(reqVO.getId(), reqVO.getPassword());
         return success(true);
@@ -90,7 +86,6 @@ public class UserController {
 
     @PutMapping("/update-status")
     @Operation(summary = "修改用户状态")
-    @PreAuthorize("@ss.hasPermission('system:user:update')")
     public CommonResult<Boolean> updateUserStatus(@Valid @RequestBody UserUpdateStatusReqVO reqVO) {
         userService.updateUserStatus(reqVO.getId(), reqVO.getStatus());
         return success(true);
@@ -98,7 +93,6 @@ public class UserController {
 
     @GetMapping("/page")
     @Operation(summary = "获得用户分页列表")
-    @PreAuthorize("@ss.hasPermission('system:user:query')")
     public CommonResult<PageResult<UserRespVO>> getUserPage(@Valid UserPageReqVO pageReqVO) {
         // 获得用户分页列表
         PageResult<AdminUserDO> pageResult = userService.getUserPage(pageReqVO);
@@ -125,15 +119,14 @@ public class UserController {
     @GetMapping("/get")
     @Operation(summary = "获得用户详情")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('system:user:query')")
     public CommonResult<UserRespVO> getUser(@RequestParam("id") Long id) {
         AdminUserDO user = userService.getUser(id);
         if (user == null) {
             return success(null);
         }
         // 拼接数据
-        DeptDO dept = deptService.getDept(user.getDeptId());
-        return success(UserConvert.INSTANCE.convert(user, dept));
+//        DeptDO dept = deptService.getDept(user.getDeptId());
+        return success(BeanUtils.toBean(user, UserRespVO.class));
     }
 
     @GetMapping("/export-excel")

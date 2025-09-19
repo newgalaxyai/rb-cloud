@@ -100,4 +100,8 @@ public class AdminUserDO extends TenantBaseDO {
      * 父id
      */
     private Long pid;
+    /**
+     * 管理员名称
+     */
+    private String adminName;
 }

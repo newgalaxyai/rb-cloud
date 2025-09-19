@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.system.dal.mysql.user;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
+import cn.iocoder.yudao.framework.datapermission.core.util.DataPermissionUtils;
 import cn.iocoder.yudao.module.system.controller.admin.user.vo.user.UserPageReqVO;
 import cn.iocoder.yudao.module.system.dal.dataobject.user.AdminUserDO;
 import org.apache.ibatis.annotations.Mapper;
@@ -38,16 +39,19 @@ public interface AdminUserMapper extends BaseMapperX<AdminUserDO> {
                 .inIfPresent(AdminUserDO::getId, userIds)
                 .orderByDesc(AdminUserDO::getId));
     }
+    
+    // 方案一：禁用数据权限的查询方法
     default PageResult<AdminUserDO> selectPage(UserPageReqVO reqVO) {
-        return selectPage(reqVO, new LambdaQueryWrapperX<AdminUserDO>()
-                .eqIfPresent(AdminUserDO::getPid,getLoginUserId())
+        // 使用 DataPermissionUtils.executeIgnore() 禁用数据权限
+        return DataPermissionUtils.executeIgnore(() -> selectPage(reqVO, new LambdaQueryWrapperX<AdminUserDO>()
+                .eqIfPresent(AdminUserDO::getPid, getLoginUserId())
+                .likeIfPresent(AdminUserDO::getAdminName, reqVO.getAdminName())
                 .likeIfPresent(AdminUserDO::getUsername, reqVO.getUsername())
                 .likeIfPresent(AdminUserDO::getMobile, reqVO.getMobile())
                 .eqIfPresent(AdminUserDO::getStatus, reqVO.getStatus())
                 .betweenIfPresent(AdminUserDO::getCreateTime, reqVO.getCreateTime())
-                .orderByDesc(AdminUserDO::getId));
+                .orderByDesc(AdminUserDO::getId)));
     }
-
 
     default List<AdminUserDO> selectListByNickname(String nickname) {
         return selectList(new LambdaQueryWrapperX<AdminUserDO>().like(AdminUserDO::getNickname, nickname));

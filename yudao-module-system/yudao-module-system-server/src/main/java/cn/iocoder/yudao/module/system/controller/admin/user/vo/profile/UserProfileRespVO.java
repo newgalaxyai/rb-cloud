@@ -49,6 +49,10 @@ public class UserProfileRespVO {
      */
     @Schema(description = "父菜单编号", example = "1024")
     private Long pid;
+    /**
+     * 管理员名称
+     */
+    private String adminName;
 //    /**
 //     * 所属角色
 //     */

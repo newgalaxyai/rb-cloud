@@ -252,6 +252,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 //        permissionService.processUserDeleted(id);
 //        // 2.2 删除用户岗位
 //        userPostMapper.deleteByUserId(id);
+        //删除子账号
 
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable("user", user);
@@ -263,11 +264,11 @@ public class AdminUserServiceImpl implements AdminUserService {
         // 1. 批量删除用户
         userMapper.deleteByIds(ids);
 
-//        // 2. 批量删除用户关联数据
-//        ids.forEach(id -> {
-//            permissionService.processUserDeleted(id);
-//            userPostMapper.deleteByUserId(id);
-//        });
+        // 2. 批量删除用户关联数据
+        ids.forEach(id -> {
+            permissionService.processUserDeleted(id);
+            userPostMapper.deleteByUserId(id);
+        });
     }
 
     @Override
@@ -286,7 +287,10 @@ public class AdminUserServiceImpl implements AdminUserService {
 //        Set<Long> userIds = reqVO.getRoleId() != null ?
 //                permissionService.getUserRoleIdListByRoleId(singleton(reqVO.getRoleId())) : null;
         // 分页查询
-        return userMapper.selectPage(reqVO);
+        log.info("【用户分页】开始查询，参数：{}", reqVO);
+        PageResult<AdminUserDO> adminUserDOPageResult = userMapper.selectPage(reqVO);
+        log.info("【用户分页】查询结果：{}", adminUserDOPageResult);
+        return adminUserDOPageResult;
     }
 
     @Override

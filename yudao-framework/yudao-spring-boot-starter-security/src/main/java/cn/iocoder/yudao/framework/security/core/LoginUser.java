@@ -21,6 +21,7 @@ public class LoginUser {
     public static final String INFO_KEY_NICKNAME = "nickname";
     public static final String INFO_KEY_DEPT_ID = "deptId";
     public static final String INFO_KEY_PID= "pid";
+    public static final String INFO_KEY_ROLE_CODE= "roleCode";
 
     /**
      * 用户编号

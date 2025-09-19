@@ -49,7 +49,6 @@ public class UserController {
 
     @PostMapping("/create")
     @Operation(summary = "新增用户")
-    @PreAuthorize("@ss.hasPermission('system:user:create')")
     public CommonResult<Long> createUser(@Valid @RequestBody UserSaveReqVO reqVO) {
         Long id = userService.createUser(reqVO);
         return success(id);

@@ -202,6 +202,7 @@ public class OAuth2TokenServiceImpl implements OAuth2TokenService {
             //在加一个pid
             return MapUtil.builder(LoginUser.INFO_KEY_NICKNAME, user.getNickname())
                     .put(LoginUser.INFO_KEY_DEPT_ID, StrUtil.toStringOrNull(user.getDeptId()))
+                    .put(LoginUser.INFO_KEY_ROLE_CODE, StrUtil.toStringOrNull(user.getRoleCode()))
                     .put(LoginUser.INFO_KEY_PID, StrUtil.toStringOrNull(user.getPid())).build();
         } else if (userType.equals(UserTypeEnum.MEMBER.getValue())) {
             // 注意：目前 Member 暂时不读取，可以按需实现

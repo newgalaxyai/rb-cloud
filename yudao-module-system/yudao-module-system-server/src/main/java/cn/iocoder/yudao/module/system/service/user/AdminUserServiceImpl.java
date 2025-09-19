@@ -45,8 +45,7 @@ import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
-import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
-import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.getLoginUserPid;
+import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.*;
 import static cn.iocoder.yudao.module.system.enums.ErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.system.enums.LogRecordConstants.*;
 
@@ -97,18 +96,26 @@ public class AdminUserServiceImpl implements AdminUserService {
 //            }
 //        });
         // 1.2 校验正确性
-        validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
-                createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds());
+        validateUserForCreateOrUpdate(null, null,
+                createReqVO.getMobile(), null,null, null);
         // 2.1 插入用户
         AdminUserDO user = BeanUtils.toBean(createReqVO, AdminUserDO.class);
         user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
+        user.setPid(getLoginUserId());
         user.setPassword(encodePassword(createReqVO.getPassword())); // 加密密码
-        userMapper.insert(user);
-        // 2.2 插入关联岗位
-        if (CollectionUtil.isNotEmpty(user.getPostIds())) {
-            userPostMapper.insertBatch(convertList(user.getPostIds(),
-                    postId -> new UserPostDO().setUserId(user.getId()).setPostId(postId)));
+        String loginUserRoleCole = getLoginUserRoleCole();
+        if("super".equals(loginUserRoleCole)){
+            user.setRoleCode("admin");
         }
+        if("admin".equals(loginUserRoleCole)){
+            user.setRoleCode("staff");
+        }
+        userMapper.insert(user);
+//        // 2.2 插入关联岗位
+//        if (CollectionUtil.isNotEmpty(user.getPostIds())) {
+//            userPostMapper.insertBatch(convertList(user.getPostIds(),
+//                    postId -> new UserPostDO().setUserId(user.getId()).setPostId(postId)));
+//        }
 
         // 3. 记录操作日志上下文
         LogRecordContext.putVariable("user", user);
@@ -146,18 +153,18 @@ public class AdminUserServiceImpl implements AdminUserService {
     public void updateUser(UserSaveReqVO updateReqVO) {
         updateReqVO.setPassword(null); // 特殊：此处不更新密码
         // 1. 校验正确性
-        AdminUserDO oldUser = validateUserForCreateOrUpdate(updateReqVO.getId(), updateReqVO.getUsername(),
-                updateReqVO.getMobile(), updateReqVO.getEmail(), updateReqVO.getDeptId(), updateReqVO.getPostIds());
+        validateUserForCreateOrUpdate(updateReqVO.getId(), null,
+                updateReqVO.getMobile(),null, null, null);
 
         // 2.1 更新用户
         AdminUserDO updateObj = BeanUtils.toBean(updateReqVO, AdminUserDO.class);
         userMapper.updateById(updateObj);
         // 2.2 更新岗位
-        updateUserPost(updateReqVO, updateObj);
+//        updateUserPost(updateReqVO, updateObj);
 
         // 3. 记录操作日志上下文
-        LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(oldUser, UserSaveReqVO.class));
-        LogRecordContext.putVariable("user", oldUser);
+//        LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(oldUser, UserSaveReqVO.class));
+//        LogRecordContext.putVariable("user", oldUser);
     }
 
     private void updateUserPost(UserSaveReqVO reqVO, AdminUserDO updateObj) {
@@ -356,7 +363,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     private AdminUserDO validateUserForCreateOrUpdate(Long id, String username, String mobile, String email,
-                                               Long deptId, Set<Long> postIds) {
+                                                      Long deptId, Set<Long> postIds) {
         // 关闭数据权限，避免因为没有数据权限，查询不到数据，进而导致唯一校验不正确
         return DataPermissionUtils.executeIgnore(() -> {
             // 校验用户存在
@@ -443,6 +450,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     /**
      * 校验旧密码
+     *
      * @param id          用户 id
      * @param oldPassword 旧密码
      */
@@ -478,7 +486,7 @@ public class AdminUserServiceImpl implements AdminUserService {
             // 2.1.1 校验字段是否符合要求
             try {
                 ValidationUtils.validate(BeanUtils.toBean(importUser, UserSaveReqVO.class).setPassword(initPassword));
-            } catch (ConstraintViolationException ex){
+            } catch (ConstraintViolationException ex) {
                 respVO.getFailureUsernames().put(importUser.getUsername(), ex.getMessage());
                 return;
             }

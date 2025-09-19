@@ -106,14 +106,23 @@ public class SecurityFrameworkUtils {
     /**
      * 获得当前用户的pid，从上下文中
      *
-     * @return 部门编号
+     * @return pid
      */
     @Nullable
     public static Long getLoginUserPid() {
         LoginUser loginUser = getLoginUser();
         return loginUser != null ? MapUtil.getLong(loginUser.getInfo(), LoginUser.INFO_KEY_PID) : null;
     }
-
+    /**
+     * 获得当前用户的roleCole，从上下文中
+     *
+     * @return roleCole
+     */
+    @Nullable
+    public static String getLoginUserRoleCole() {
+        LoginUser loginUser = getLoginUser();
+        return loginUser != null ? MapUtil.getStr(loginUser.getInfo(), LoginUser.INFO_KEY_ROLE_CODE) : null;
+    }
     /**
      * 获得当前用户的部门编号，从上下文中
      *

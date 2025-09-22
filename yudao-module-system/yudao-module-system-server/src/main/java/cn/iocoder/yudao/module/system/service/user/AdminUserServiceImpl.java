@@ -251,6 +251,10 @@ public class AdminUserServiceImpl implements AdminUserService {
 //        permissionService.processUserDeleted(id);
 //        // 2.2 删除用户岗位
 //        userPostMapper.deleteByUserId(id);
+        if("super".equals(getLoginUserRoleCole())){
+            userMapper.deleteByPid(id);
+        }
+        //删除下级账号
         //删除子账号
 
         // 3. 记录操作日志上下文
@@ -289,30 +293,58 @@ public class AdminUserServiceImpl implements AdminUserService {
         PageResult<AdminUserDO> adminUserDOPageResult = userMapper.selectPage(reqVO);
 //        log.info("【用户分页】查询结果：{}", adminUserDOPageResult);
         List<UserRespVO> userRespVOList = BeanUtils.toBean(adminUserDOPageResult.getList(), UserRespVO.class);
-        if("super".equals(getLoginUserRoleCole())){
+        
+        // 非空校验
+        if (CollUtil.isNotEmpty(userRespVOList) && "super".equals(getLoginUserRoleCole())) {
             // 获取所有用户ID，用于批量查询下级账号
             List<Long> userIds = userRespVOList.stream()
                     .map(UserRespVO::getId)
+                    .filter(Objects::nonNull) // 过滤空ID
                     .collect(Collectors.toList());
+            
+            // 只有当userIds不为空时才进行查询
+            if (CollUtil.isNotEmpty(userIds)) {
+                // 批量查询所有用户的下级账号
+                List<AdminUserDO> allSubUsers = userMapper.selectList(
+                        new LambdaQueryWrapperX<AdminUserDO>()
+                                .in(AdminUserDO::getPid, userIds)
+                );
 
-            // 批量查询所有用户的下级账号
-            List<AdminUserDO> allSubUsers = userMapper.selectList(
-                    new LambdaQueryWrapperX<AdminUserDO>()
-                            .in(AdminUserDO::getPid, userIds)
-            );
+                // 将下级账号按照pid分组（添加非空校验）
+                Map<Long, List<AdminUserDO>> subUserMap = CollUtil.isNotEmpty(allSubUsers) ?
+                        allSubUsers.stream()
+                                .filter(user -> user.getPid() != null) // 过滤pid为空的记录
+                                .collect(Collectors.groupingBy(AdminUserDO::getPid)) :
+                        new HashMap<>();
 
-            // 将下级账号按照pid分组
-            Map<Long, List<AdminUserDO>> subUserMap = allSubUsers.stream()
-                    .collect(Collectors.groupingBy(AdminUserDO::getPid));
-
-            // 为每个用户设置是否有下级账号
-            userRespVOList.forEach(userRespVO -> {
-                // 检查该用户是否有下级账号
-                boolean hasChildren = subUserMap.containsKey(userRespVO.getId()) &&
-                        !subUserMap.get(userRespVO.getId()).isEmpty();
-                userRespVO.setHasChildren(hasChildren);
-            });
+                // 为每个用户设置是否有下级账号
+                userRespVOList.forEach(userRespVO -> {
+                    if (userRespVO != null && userRespVO.getId() != null) {
+                        // 检查该用户是否有下级账号
+                        boolean hasChildren = subUserMap.containsKey(userRespVO.getId()) &&
+                                CollUtil.isNotEmpty(subUserMap.get(userRespVO.getId()));
+                        userRespVO.setHasChildren(hasChildren);
+                    }
+                });
+            } else {
+                // 如果没有有效的用户ID，则所有用户都设置为没有下级
+                userRespVOList.forEach(userRespVO -> {
+                    if (userRespVO != null) {
+                        userRespVO.setHasChildren(false);
+                    }
+                });
+            }
+        } else {
+            // 如果用户列表为空或角色不是super，则所有用户都设置为没有下级
+            if (CollUtil.isNotEmpty(userRespVOList)) {
+                userRespVOList.forEach(userRespVO -> {
+                    if (userRespVO != null) {
+                        userRespVO.setHasChildren(false);
+                    }
+                });
+            }
         }
+        
         return new PageResult<>(userRespVOList, adminUserDOPageResult.getTotal());
     }
 
@@ -495,54 +527,67 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class) // 添加事务，异常则回滚所有导入
-    public UserImportRespVO importUserList(List<UserImportExcelVO> importUsers, boolean isUpdateSupport) {
+    public UserImportRespVO importUserList(List<UserImportExcelVO> importUsers) {
         // 1.1 参数校验
         if (CollUtil.isEmpty(importUsers)) {
             throw exception(USER_IMPORT_LIST_IS_EMPTY);
         }
-        // 1.2 初始化密码不能为空
-        String initPassword = configApi.getConfigValueByKey(USER_INIT_PASSWORD_KEY).getCheckedData();
-        if (StrUtil.isEmpty(initPassword)) {
-            throw exception(USER_IMPORT_INIT_PASSWORD);
-        }
 
-        // 2. 遍历，逐个创建 or 更新
+        // 2. 遍历，逐个创建用户
         UserImportRespVO respVO = UserImportRespVO.builder().createUsernames(new ArrayList<>())
                 .updateUsernames(new ArrayList<>()).failureUsernames(new LinkedHashMap<>()).build();
         importUsers.forEach(importUser -> {
-            // 2.1.1 校验字段是否符合要求
-            try {
-                ValidationUtils.validate(BeanUtils.toBean(importUser, UserSaveReqVO.class).setPassword(initPassword));
-            } catch (ConstraintViolationException ex) {
-                respVO.getFailureUsernames().put(importUser.getUsername(), ex.getMessage());
-                return;
-            }
-            // 2.1.2 校验，判断是否有不符合的原因
-            try {
-                validateUserForCreateOrUpdate(null, null, importUser.getMobile(), importUser.getEmail(),
-                        importUser.getDeptId(), null);
-            } catch (ServiceException ex) {
-                respVO.getFailureUsernames().put(importUser.getUsername(), ex.getMessage());
+            // 2.1 校验手机号是否为空
+            if (StrUtil.isEmpty(importUser.getMobile())) {
+                respVO.getFailureUsernames().put(importUser.getNickname(), "手机号不能为空");
                 return;
             }
 
-            // 2.2.1 判断如果不存在，在进行插入
-            AdminUserDO existUser = userMapper.selectByUsername(importUser.getUsername());
-            if (existUser == null) {
-                userMapper.insert(BeanUtils.toBean(importUser, AdminUserDO.class)
-                        .setPassword(encodePassword(initPassword)).setPostIds(new HashSet<>())); // 设置默认密码及空岗位编号数组
-                respVO.getCreateUsernames().add(importUser.getUsername());
+            // 2.1.1 校验手机号格式
+            if (!ValidationUtils.isMobile(importUser.getMobile())) {
+                respVO.getFailureUsernames().put(importUser.getNickname(), "手机号格式不正确");
                 return;
             }
-            // 2.2.2 如果存在，判断是否允许更新
-            if (!isUpdateSupport) {
-                respVO.getFailureUsernames().put(importUser.getUsername(), USER_USERNAME_EXISTS.getMsg());
+
+            // 2.2 校验手机号是否已存在
+            AdminUserDO existUserByMobile = userMapper.selectByMobile(importUser.getMobile());
+            if (existUserByMobile != null) {
+                respVO.getFailureUsernames().put(importUser.getNickname(), "手机号已存在");
                 return;
             }
-            AdminUserDO updateUser = BeanUtils.toBean(importUser, AdminUserDO.class);
-            updateUser.setId(existUser.getId());
-            userMapper.updateById(updateUser);
-            respVO.getUpdateUsernames().add(importUser.getUsername());
+
+            // 2.3 校验其他字段
+            try {
+                validateUserForCreateOrUpdate(null, null, importUser.getMobile(), null, null, null);
+            } catch (ServiceException ex) {
+                respVO.getFailureUsernames().put(importUser.getNickname(), ex.getMessage());
+                return;
+            }
+
+            // 2.4 创建用户
+            try {
+                AdminUserDO newUser = new AdminUserDO();
+                newUser.setNickname(importUser.getNickname());
+                newUser.setMobile(importUser.getMobile());
+                newUser.setUsername(importUser.getMobile()); // 使用手机号作为用户名
+                newUser.setPassword(encodePassword("rb123456"));
+                newUser.setPid(getLoginUserId());
+
+                // 根据当前登录用户角色设置新用户角色
+                String loginUserRoleCole = getLoginUserRoleCole();
+                if("super".equals(loginUserRoleCole)){
+                    newUser.setRoleCode("admin");
+                    newUser.setAdminName(importUser.getAdminName());
+                }
+                if("admin".equals(loginUserRoleCole)){
+                    newUser.setRoleCode("staff");
+                }
+
+                userMapper.insert(newUser);
+                respVO.getCreateUsernames().add(importUser.getNickname());
+            } catch (Exception ex) {
+                respVO.getFailureUsernames().put(importUser.getNickname(), "创建用户失败：" + ex.getMessage());
+            }
         });
         return respVO;
     }

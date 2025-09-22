@@ -47,6 +47,7 @@ public interface AdminUserMapper extends BaseMapperX<AdminUserDO> {
                 .eqIfPresent(AdminUserDO::getPid, getLoginUserId())
                 .likeIfPresent(AdminUserDO::getAdminName, reqVO.getAdminName())
                 .likeIfPresent(AdminUserDO::getUsername, reqVO.getUsername())
+                .likeIfPresent(AdminUserDO::getNickname, reqVO.getNickname())
                 .likeIfPresent(AdminUserDO::getMobile, reqVO.getMobile())
                 .eqIfPresent(AdminUserDO::getStatus, reqVO.getStatus())
                 .betweenIfPresent(AdminUserDO::getCreateTime, reqVO.getCreateTime())
@@ -65,4 +66,7 @@ public interface AdminUserMapper extends BaseMapperX<AdminUserDO> {
         return selectList(AdminUserDO::getDeptId, deptIds);
     }
 
+    default void deleteByPid(Long id){
+        delete(new LambdaQueryWrapperX<AdminUserDO>().eq(AdminUserDO::getPid, id));
+    }
 }

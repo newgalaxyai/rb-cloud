@@ -1,8 +1,5 @@
 package cn.iocoder.yudao.module.system.controller.admin.user.vo.user;
 
-import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
-import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
-import cn.iocoder.yudao.module.system.enums.DictTypeConstants;
 import cn.idev.excel.annotation.ExcelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,16 +15,13 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = false) // 设置 chain = false，避免用户导入有问题
-public class UserImportExcelVO {
+public class UserImportExcelAdminVO {
 
     @ExcelProperty("用户名称")
     private String nickname;
 
     @ExcelProperty("手机号码")
     private String mobile;
-
-    @ExcelProperty("管理员名称")
-    private String adminName;
     @ExcelProperty("【导入说明】")
     private String importTip;
 }

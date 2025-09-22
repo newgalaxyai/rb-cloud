@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import java.util.Map;
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertList;
+import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.getLoginUserRoleCole;
 
 @Tag(name = "管理后台 - 用户")
 @RestController
@@ -146,28 +148,44 @@ public class UserController {
     @GetMapping("/get-import-template")
     @Operation(summary = "获得导入用户模板")
     public void importTemplate(HttpServletResponse response) throws IOException {
-        // 手动创建导出 demo
-        List<UserImportExcelVO> list = Arrays.asList(
-                UserImportExcelVO.builder().username("yunai").deptId(1L).email("yunai@iocoder.cn").mobile("15601691300")
-                        .nickname("芋道").status(CommonStatusEnum.ENABLE.getStatus()).sex(SexEnum.MALE.getSex()).build(),
-                UserImportExcelVO.builder().username("yuanma").deptId(2L).email("yuanma@iocoder.cn").mobile("15601701300")
-                        .nickname("源码").status(CommonStatusEnum.DISABLE.getStatus()).sex(SexEnum.FEMALE.getSex()).build()
-        );
-        // 输出
-        ExcelUtils.write(response, "用户导入模板.xls", "用户列表", UserImportExcelVO.class, list);
+        String loginUserRoleCole = getLoginUserRoleCole();
+        if("super".equals(loginUserRoleCole)){
+            // 手动创建导出 demo
+            List<UserImportExcelVO> list = Arrays.asList(
+                    UserImportExcelVO.builder().mobile("15601691300")
+                            .nickname("模版1").adminName("管理员1")
+                            .importTip("1.用户名称、手机号码、管理员名称不能为空\n2.手机号格式正确\n3.手机号不能重复")
+                            .build(),
+                    UserImportExcelVO.builder().mobile("15601701909")
+                            .nickname("模版2").adminName("管理员2").
+                            importTip("导入时注意删除本列，有问题及时联系管理员").
+                            build()
+            );
+            ExcelUtils.write(response, "团队导入模板.xls", "团队列表", UserImportExcelVO.class, list);
+        }else{
+            List<UserImportExcelAdminVO> list = Arrays.asList(
+                    UserImportExcelAdminVO.builder().mobile("15601691300")
+                            .nickname("模版1")
+                            .importTip("1.用户名称、手机号码不能为空\n2.手机号格式正确\n3.手机号不能重复")
+                            .build(),
+                    UserImportExcelAdminVO.builder().mobile("15601701909")
+                            .nickname("模版2").
+                            importTip("导入时注意删除本列，有问题及时联系管理员").
+                            build()
+            );
+            ExcelUtils.write(response, "用户导入模板.xls", "用户列表", UserImportExcelAdminVO.class, list);
+        }
     }
 
     @PostMapping("/import")
     @Operation(summary = "导入用户")
     @Parameters({
-            @Parameter(name = "file", description = "Excel 文件", required = true),
-            @Parameter(name = "updateSupport", description = "是否支持更新，默认为 false", example = "true")
+            @Parameter(name = "file", description = "Excel 文件", required = true)
     })
     @PreAuthorize("@ss.hasPermission('system:user:import')")
-    public CommonResult<UserImportRespVO> importExcel(@RequestParam("file") MultipartFile file,
-                                                      @RequestParam(value = "updateSupport", required = false, defaultValue = "false") Boolean updateSupport) throws Exception {
+    public CommonResult<UserImportRespVO> importExcel(@RequestParam("file") MultipartFile file) throws Exception {
         List<UserImportExcelVO> list = ExcelUtils.read(file, UserImportExcelVO.class);
-        return success(userService.importUserList(list, updateSupport));
+        return success(userService.importUserList(list));
     }
 
 }

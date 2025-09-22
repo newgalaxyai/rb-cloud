@@ -186,13 +186,12 @@ public interface AdminUserService {
     List<AdminUserDO> getUserListByNickname(String nickname);
 
     /**
-     * 批量导入用户
+     * 批量导入用户（仅支持添加）
      *
-     * @param importUsers     导入用户列表
-     * @param isUpdateSupport 是否支持更新
+     * @param importUsers 导入用户列表
      * @return 导入结果
      */
-    UserImportRespVO importUserList(List<UserImportExcelVO> importUsers, boolean isUpdateSupport);
+    UserImportRespVO importUserList(List<UserImportExcelVO> importUsers);
 
     /**
      * 获得指定状态的用户们

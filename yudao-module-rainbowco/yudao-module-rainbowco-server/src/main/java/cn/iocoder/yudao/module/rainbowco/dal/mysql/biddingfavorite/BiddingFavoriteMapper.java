@@ -7,6 +7,8 @@ import cn.iocoder.yudao.module.rainbowco.controller.admin.biddingfavorite.vo.Bid
 import cn.iocoder.yudao.module.rainbowco.dal.dataobject.biddingfavorite.BiddingFavoriteDO;
 import org.apache.ibatis.annotations.Mapper;
 
+import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
+
 /**
  * 招标信息收藏 Mapper
  *
@@ -17,8 +19,7 @@ public interface BiddingFavoriteMapper extends BaseMapperX<BiddingFavoriteDO> {
 
     default PageResult<BiddingFavoriteDO> selectPage(BiddingFavoritePageReqVO reqVO) {
         return selectPage(reqVO, new LambdaQueryWrapperX<BiddingFavoriteDO>()
-                .eqIfPresent(BiddingFavoriteDO::getBiddingId, reqVO.getBiddingId())
-                .eqIfPresent(BiddingFavoriteDO::getUserId, reqVO.getUserId())
+                .eqIfPresent(BiddingFavoriteDO::getUserId, getLoginUserId())
                 .betweenIfPresent(BiddingFavoriteDO::getCreateTime, reqVO.getCreateTime())
                 .orderByDesc(BiddingFavoriteDO::getId));
     }

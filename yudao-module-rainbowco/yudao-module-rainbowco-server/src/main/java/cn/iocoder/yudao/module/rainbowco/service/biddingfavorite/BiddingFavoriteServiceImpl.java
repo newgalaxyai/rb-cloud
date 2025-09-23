@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.rainbowco.service.biddingfavorite;
 
+import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.module.rainbowco.controller.admin.biddingfavorite.vo.BiddingFavoritePageReqVO;
 import cn.iocoder.yudao.module.rainbowco.controller.admin.biddingfavorite.vo.BiddingFavoriteSaveReqVO;
 import org.springframework.stereotype.Service;
@@ -79,4 +80,24 @@ public class BiddingFavoriteServiceImpl implements BiddingFavoriteService {
         return biddingFavoriteMapper.selectPage(pageReqVO);
     }
 
+    @Override
+    public boolean toggleBiddingFavorite(BiddingFavoriteSaveReqVO createReqVO) {
+        // 查询是否已存在收藏记录
+        BiddingFavoriteDO existingFavorite = biddingFavoriteMapper.selectOne(
+            new LambdaQueryWrapperX<BiddingFavoriteDO>()
+                .eq(BiddingFavoriteDO::getBiddingId, createReqVO.getBiddingId())
+                .eq(BiddingFavoriteDO::getUserId, createReqVO.getUserId())
+        );
+        
+        if (existingFavorite != null) {
+            // 已收藏，执行取消收藏
+            biddingFavoriteMapper.deleteById(existingFavorite.getId());
+            return false; // 返回false表示已取消收藏
+        } else {
+            // 未收藏，执行收藏
+            BiddingFavoriteDO biddingFavorite = BeanUtils.toBean(createReqVO, BiddingFavoriteDO.class);
+            biddingFavoriteMapper.insert(biddingFavorite);
+            return true; // 返回true表示已收藏
+        }
+    }
 }

@@ -40,50 +40,40 @@ public class BiddingFavoriteController {
     private BiddingFavoriteService biddingFavoriteService;
 
     @PostMapping("/create")
-    @Operation(summary = "创建招标信息收藏")
-    @PreAuthorize("@ss.hasPermission('rb:bidding-favorite:create')")
-    public CommonResult<Long> createBiddingFavorite(@Valid @RequestBody BiddingFavoriteSaveReqVO createReqVO) {
-        return success(biddingFavoriteService.createBiddingFavorite(createReqVO));
+    @Operation(summary = "招标信息收藏/取消收藏")
+    public CommonResult<Boolean> createBiddingFavorite(@Valid @RequestBody BiddingFavoriteSaveReqVO createReqVO) {
+        boolean isFavorited = biddingFavoriteService.toggleBiddingFavorite(createReqVO);
+        return success(isFavorited);
     }
 
-    @PutMapping("/update")
-    @Operation(summary = "更新招标信息收藏")
-    @PreAuthorize("@ss.hasPermission('rb:bidding-favorite:update')")
-    public CommonResult<Boolean> updateBiddingFavorite(@Valid @RequestBody BiddingFavoriteSaveReqVO updateReqVO) {
-        biddingFavoriteService.updateBiddingFavorite(updateReqVO);
-        return success(true);
-    }
 
     @DeleteMapping("/delete")
     @Operation(summary = "删除招标信息收藏")
     @Parameter(name = "id", description = "编号", required = true)
-    @PreAuthorize("@ss.hasPermission('rb:bidding-favorite:delete')")
     public CommonResult<Boolean> deleteBiddingFavorite(@RequestParam("id") Long id) {
         biddingFavoriteService.deleteBiddingFavorite(id);
         return success(true);
     }
 
-    @DeleteMapping("/delete-list")
+    @PostMapping("/delete-list")
     @Parameter(name = "ids", description = "编号", required = true)
     @Operation(summary = "批量删除招标信息收藏")
-                @PreAuthorize("@ss.hasPermission('rb:bidding-favorite:delete')")
-    public CommonResult<Boolean> deleteBiddingFavoriteList(@RequestParam("ids") List<Long> ids) {
+    public CommonResult<Boolean> deleteBiddingFavoriteList(@RequestBody List<Long> ids) {
         biddingFavoriteService.deleteBiddingFavoriteListByIds(ids);
         return success(true);
     }
 
-    @GetMapping("/get")
-    @Operation(summary = "获得招标信息收藏")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('rb:bidding-favorite:query')")
-    public CommonResult<BiddingFavoriteRespVO> getBiddingFavorite(@RequestParam("id") Long id) {
-        BiddingFavoriteDO biddingFavorite = biddingFavoriteService.getBiddingFavorite(id);
-        return success(BeanUtils.toBean(biddingFavorite, BiddingFavoriteRespVO.class));
-    }
+//    @GetMapping("/get")
+//    @Operation(summary = "获得招标信息收藏")
+//    @Parameter(name = "id", description = "编号", required = true, example = "1024")
+//    @PreAuthorize("@ss.hasPermission('rb:bidding-favorite:query')")
+//    public CommonResult<BiddingFavoriteRespVO> getBiddingFavorite(@RequestParam("id") Long id) {
+//        BiddingFavoriteDO biddingFavorite = biddingFavoriteService.getBiddingFavorite(id);
+//        return success(BeanUtils.toBean(biddingFavorite, BiddingFavoriteRespVO.class));
+//    }
 
     @GetMapping("/page")
     @Operation(summary = "获得招标信息收藏分页")
-    @PreAuthorize("@ss.hasPermission('rb:bidding-favorite:query')")
     public CommonResult<PageResult<BiddingFavoriteRespVO>> getBiddingFavoritePage(@Valid BiddingFavoritePageReqVO pageReqVO) {
         PageResult<BiddingFavoriteDO> pageResult = biddingFavoriteService.getBiddingFavoritePage(pageReqVO);
         return success(BeanUtils.toBean(pageResult, BiddingFavoriteRespVO.class));
@@ -91,7 +81,6 @@ public class BiddingFavoriteController {
 
     @GetMapping("/export-excel")
     @Operation(summary = "导出招标信息收藏 Excel")
-    @PreAuthorize("@ss.hasPermission('rb:bidding-favorite:export')")
     @ApiAccessLog(operateType = EXPORT)
     public void exportBiddingFavoriteExcel(@Valid BiddingFavoritePageReqVO pageReqVO,
               HttpServletResponse response) throws IOException {

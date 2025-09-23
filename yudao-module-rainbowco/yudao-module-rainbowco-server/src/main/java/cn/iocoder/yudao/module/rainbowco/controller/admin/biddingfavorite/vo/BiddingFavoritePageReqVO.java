@@ -13,11 +13,11 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @Data
 public class BiddingFavoritePageReqVO extends PageParam {
 
-    @Schema(description = "招标id", example = "7378")
-    private Long biddingId;
-
-    @Schema(description = "用户编号", example = "23629")
-    private Long userId;
+//    @Schema(description = "招标id", example = "7378")
+//    private Long biddingId;
+//
+//    @Schema(description = "用户编号", example = "23629")
+//    private Long userId;
 
     @Schema(description = "创建时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)

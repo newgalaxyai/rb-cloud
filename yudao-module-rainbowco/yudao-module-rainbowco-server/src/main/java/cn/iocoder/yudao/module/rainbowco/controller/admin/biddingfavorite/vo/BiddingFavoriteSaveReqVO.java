@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 @Data
 public class BiddingFavoriteSaveReqVO {
 
-    @Schema(description = "日志主键", requiredMode = Schema.RequiredMode.REQUIRED, example = "6721")
+    @Schema(description = "日志主键", example = "6721")
     private Long id;
 
     @Schema(description = "招标id", requiredMode = Schema.RequiredMode.REQUIRED, example = "7378")

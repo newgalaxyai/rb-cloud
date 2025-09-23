@@ -60,4 +60,11 @@ public interface BiddingFavoriteService {
      */
     PageResult<BiddingFavoriteDO> getBiddingFavoritePage(BiddingFavoritePageReqVO pageReqVO);
 
+    /**
+     * 切换招标信息收藏状态
+     *
+     * @param createReqVO 收藏信息
+     * @return 是否已收藏（true=已收藏，false=已取消收藏）
+     */
+    boolean toggleBiddingFavorite(@Valid BiddingFavoriteSaveReqVO createReqVO);
 }

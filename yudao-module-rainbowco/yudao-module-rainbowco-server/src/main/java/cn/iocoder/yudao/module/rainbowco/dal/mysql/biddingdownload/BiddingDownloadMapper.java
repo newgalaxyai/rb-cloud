@@ -7,6 +7,8 @@ import cn.iocoder.yudao.module.rainbowco.controller.admin.biddingdownload.vo.Bid
 import cn.iocoder.yudao.module.rainbowco.dal.dataobject.biddingdownload.BiddingDownloadDO;
 import org.apache.ibatis.annotations.Mapper;
 
+import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
+
 /**
  * 招标信息下载记录 Mapper
  *
@@ -18,7 +20,7 @@ public interface BiddingDownloadMapper extends BaseMapperX<BiddingDownloadDO> {
     default PageResult<BiddingDownloadDO> selectPage(BiddingDownloadPageReqVO reqVO) {
         return selectPage(reqVO, new LambdaQueryWrapperX<BiddingDownloadDO>()
                 .eqIfPresent(BiddingDownloadDO::getBiddingId, reqVO.getBiddingId())
-                .eqIfPresent(BiddingDownloadDO::getUserId, reqVO.getUserId())
+                .eqIfPresent(BiddingDownloadDO::getUserId, getLoginUserId())
                 .betweenIfPresent(BiddingDownloadDO::getCreateTime, reqVO.getCreateTime())
                 .orderByDesc(BiddingDownloadDO::getId));
     }

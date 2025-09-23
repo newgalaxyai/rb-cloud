@@ -41,49 +41,36 @@ public class BiddingDownloadController {
 
     @PostMapping("/create")
     @Operation(summary = "创建招标信息下载记录")
-    @PreAuthorize("@ss.hasPermission('rb:bidding-download:create')")
     public CommonResult<Long> createBiddingDownload(@Valid @RequestBody BiddingDownloadSaveReqVO createReqVO) {
         return success(biddingDownloadService.createBiddingDownload(createReqVO));
     }
-
-    @PutMapping("/update")
-    @Operation(summary = "更新招标信息下载记录")
-    @PreAuthorize("@ss.hasPermission('rb:bidding-download:update')")
-    public CommonResult<Boolean> updateBiddingDownload(@Valid @RequestBody BiddingDownloadSaveReqVO updateReqVO) {
-        biddingDownloadService.updateBiddingDownload(updateReqVO);
-        return success(true);
-    }
-
     @DeleteMapping("/delete")
     @Operation(summary = "删除招标信息下载记录")
     @Parameter(name = "id", description = "编号", required = true)
-    @PreAuthorize("@ss.hasPermission('rb:bidding-download:delete')")
     public CommonResult<Boolean> deleteBiddingDownload(@RequestParam("id") Long id) {
         biddingDownloadService.deleteBiddingDownload(id);
         return success(true);
     }
 
-    @DeleteMapping("/delete-list")
+    @PostMapping("/delete-list")
     @Parameter(name = "ids", description = "编号", required = true)
     @Operation(summary = "批量删除招标信息下载记录")
-                @PreAuthorize("@ss.hasPermission('rb:bidding-download:delete')")
-    public CommonResult<Boolean> deleteBiddingDownloadList(@RequestParam("ids") List<Long> ids) {
+    public CommonResult<Boolean> deleteBiddingDownloadList(@RequestBody List<Long> ids) {
         biddingDownloadService.deleteBiddingDownloadListByIds(ids);
         return success(true);
     }
 
-    @GetMapping("/get")
-    @Operation(summary = "获得招标信息下载记录")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('rb:bidding-download:query')")
-    public CommonResult<BiddingDownloadRespVO> getBiddingDownload(@RequestParam("id") Long id) {
-        BiddingDownloadDO biddingDownload = biddingDownloadService.getBiddingDownload(id);
-        return success(BeanUtils.toBean(biddingDownload, BiddingDownloadRespVO.class));
-    }
+//    @GetMapping("/get")
+//    @Operation(summary = "获得招标信息下载记录")
+//    @Parameter(name = "id", description = "编号", required = true, example = "1024")
+//    @PreAuthorize("@ss.hasPermission('rb:bidding-download:query')")
+//    public CommonResult<BiddingDownloadRespVO> getBiddingDownload(@RequestParam("id") Long id) {
+//        BiddingDownloadDO biddingDownload = biddingDownloadService.getBiddingDownload(id);
+//        return success(BeanUtils.toBean(biddingDownload, BiddingDownloadRespVO.class));
+//    }
 
     @GetMapping("/page")
     @Operation(summary = "获得招标信息下载记录分页")
-    @PreAuthorize("@ss.hasPermission('rb:bidding-download:query')")
     public CommonResult<PageResult<BiddingDownloadRespVO>> getBiddingDownloadPage(@Valid BiddingDownloadPageReqVO pageReqVO) {
         PageResult<BiddingDownloadDO> pageResult = biddingDownloadService.getBiddingDownloadPage(pageReqVO);
         return success(BeanUtils.toBean(pageResult, BiddingDownloadRespVO.class));
@@ -91,7 +78,6 @@ public class BiddingDownloadController {
 
     @GetMapping("/export-excel")
     @Operation(summary = "导出招标信息下载记录 Excel")
-    @PreAuthorize("@ss.hasPermission('rb:bidding-download:export')")
     @ApiAccessLog(operateType = EXPORT)
     public void exportBiddingDownloadExcel(@Valid BiddingDownloadPageReqVO pageReqVO,
               HttpServletResponse response) throws IOException {

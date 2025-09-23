@@ -41,49 +41,45 @@ public class BiddingHistoryController {
 
     @PostMapping("/create")
     @Operation(summary = "创建招标信息历史浏览记录")
-    @PreAuthorize("@ss.hasPermission('rb:bidding-history:create')")
     public CommonResult<Long> createBiddingHistory(@Valid @RequestBody BiddingHistorySaveReqVO createReqVO) {
         return success(biddingHistoryService.createBiddingHistory(createReqVO));
     }
 
-    @PutMapping("/update")
-    @Operation(summary = "更新招标信息历史浏览记录")
-    @PreAuthorize("@ss.hasPermission('rb:bidding-history:update')")
-    public CommonResult<Boolean> updateBiddingHistory(@Valid @RequestBody BiddingHistorySaveReqVO updateReqVO) {
-        biddingHistoryService.updateBiddingHistory(updateReqVO);
-        return success(true);
-    }
+//    @PutMapping("/update")
+//    @Operation(summary = "更新招标信息历史浏览记录")
+//    @PreAuthorize("@ss.hasPermission('rb:bidding-history:update')")
+//    public CommonResult<Boolean> updateBiddingHistory(@Valid @RequestBody BiddingHistorySaveReqVO updateReqVO) {
+//        biddingHistoryService.updateBiddingHistory(updateReqVO);
+//        return success(true);
+//    }
 
     @DeleteMapping("/delete")
     @Operation(summary = "删除招标信息历史浏览记录")
     @Parameter(name = "id", description = "编号", required = true)
-    @PreAuthorize("@ss.hasPermission('rb:bidding-history:delete')")
     public CommonResult<Boolean> deleteBiddingHistory(@RequestParam("id") Long id) {
         biddingHistoryService.deleteBiddingHistory(id);
         return success(true);
     }
 
-    @DeleteMapping("/delete-list")
+    @PostMapping("/delete-list")
     @Parameter(name = "ids", description = "编号", required = true)
     @Operation(summary = "批量删除招标信息历史浏览记录")
-                @PreAuthorize("@ss.hasPermission('rb:bidding-history:delete')")
     public CommonResult<Boolean> deleteBiddingHistoryList(@RequestParam("ids") List<Long> ids) {
         biddingHistoryService.deleteBiddingHistoryListByIds(ids);
         return success(true);
     }
 
-    @GetMapping("/get")
-    @Operation(summary = "获得招标信息历史浏览记录")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('rb:bidding-history:query')")
-    public CommonResult<BiddingHistoryRespVO> getBiddingHistory(@RequestParam("id") Long id) {
-        BiddingHistoryDO biddingHistory = biddingHistoryService.getBiddingHistory(id);
-        return success(BeanUtils.toBean(biddingHistory, BiddingHistoryRespVO.class));
-    }
+//    @GetMapping("/get")
+//    @Operation(summary = "获得招标信息历史浏览记录")
+//    @Parameter(name = "id", description = "编号", required = true, example = "1024")
+//    @PreAuthorize("@ss.hasPermission('rb:bidding-history:query')")
+//    public CommonResult<BiddingHistoryRespVO> getBiddingHistory(@RequestParam("id") Long id) {
+//        BiddingHistoryDO biddingHistory = biddingHistoryService.getBiddingHistory(id);
+//        return success(BeanUtils.toBean(biddingHistory, BiddingHistoryRespVO.class));
+//    }
 
     @GetMapping("/page")
     @Operation(summary = "获得招标信息历史浏览记录分页")
-    @PreAuthorize("@ss.hasPermission('rb:bidding-history:query')")
     public CommonResult<PageResult<BiddingHistoryRespVO>> getBiddingHistoryPage(@Valid BiddingHistoryPageReqVO pageReqVO) {
         PageResult<BiddingHistoryDO> pageResult = biddingHistoryService.getBiddingHistoryPage(pageReqVO);
         return success(BeanUtils.toBean(pageResult, BiddingHistoryRespVO.class));
@@ -91,7 +87,6 @@ public class BiddingHistoryController {
 
     @GetMapping("/export-excel")
     @Operation(summary = "导出招标信息历史浏览记录 Excel")
-    @PreAuthorize("@ss.hasPermission('rb:bidding-history:export')")
     @ApiAccessLog(operateType = EXPORT)
     public void exportBiddingHistoryExcel(@Valid BiddingHistoryPageReqVO pageReqVO,
               HttpServletResponse response) throws IOException {

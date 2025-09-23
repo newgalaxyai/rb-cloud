@@ -267,11 +267,11 @@ public class AdminUserServiceImpl implements AdminUserService {
         // 1. 批量删除用户
         userMapper.deleteByIds(ids);
 
-        // 2. 批量删除用户关联数据
-        ids.forEach(id -> {
-            permissionService.processUserDeleted(id);
-            userPostMapper.deleteByUserId(id);
-        });
+//        // 2. 批量删除用户关联数据
+//        ids.forEach(id -> {
+//            permissionService.processUserDeleted(id);
+//            userPostMapper.deleteByUserId(id);
+//        });
     }
 
     @Override
@@ -532,6 +532,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (CollUtil.isEmpty(importUsers)) {
             throw exception(USER_IMPORT_LIST_IS_EMPTY);
         }
+        String loginUserRoleCole = getLoginUserRoleCole();
 
         // 2. 遍历，逐个创建用户
         UserImportRespVO respVO = UserImportRespVO.builder().createUsernames(new ArrayList<>())
@@ -542,7 +543,16 @@ public class AdminUserServiceImpl implements AdminUserService {
                 respVO.getFailureUsernames().put(importUser.getNickname(), "手机号不能为空");
                 return;
             }
-
+            if (StrUtil.isEmpty(importUser.getNickname())) {
+                respVO.getFailureUsernames().put(importUser.getNickname(), "用户名不能为空");
+                return;
+            }
+            if("super".equals(loginUserRoleCole)){
+                if (StrUtil.isEmpty(importUser.getAdminName())){
+                    respVO.getFailureUsernames().put(importUser.getNickname(), "管理员名称不能为空");
+                    return;
+                }
+            }
             // 2.1.1 校验手机号格式
             if (!ValidationUtils.isMobile(importUser.getMobile())) {
                 respVO.getFailureUsernames().put(importUser.getNickname(), "手机号格式不正确");
@@ -574,7 +584,6 @@ public class AdminUserServiceImpl implements AdminUserService {
                 newUser.setPid(getLoginUserId());
 
                 // 根据当前登录用户角色设置新用户角色
-                String loginUserRoleCole = getLoginUserRoleCole();
                 if("super".equals(loginUserRoleCole)){
                     newUser.setRoleCode("admin");
                     newUser.setAdminName(importUser.getAdminName());

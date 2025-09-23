@@ -71,10 +71,9 @@ public class UserController {
         return success(true);
     }
 
-    @DeleteMapping("/delete-list")
-    @Parameter(name = "ids", description = "编号列表", required = true)
+    @PostMapping("/delete-list")
     @Operation(summary = "批量删除用户")
-    public CommonResult<Boolean> deleteUserList(@RequestParam("ids") List<Long> ids) {
+    public CommonResult<Boolean> deleteUserList(@RequestBody List<Long> ids) {
         userService.deleteUserList(ids);
         return success(true);
     }

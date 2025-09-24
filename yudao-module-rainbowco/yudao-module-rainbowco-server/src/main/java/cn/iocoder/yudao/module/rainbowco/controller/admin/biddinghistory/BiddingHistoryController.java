@@ -64,7 +64,7 @@ public class BiddingHistoryController {
     @PostMapping("/delete-list")
     @Parameter(name = "ids", description = "编号", required = true)
     @Operation(summary = "批量删除招标信息历史浏览记录")
-    public CommonResult<Boolean> deleteBiddingHistoryList(@RequestParam("ids") List<Long> ids) {
+    public CommonResult<Boolean> deleteBiddingHistoryList(@RequestBody List<Long> ids) {
         biddingHistoryService.deleteBiddingHistoryListByIds(ids);
         return success(true);
     }

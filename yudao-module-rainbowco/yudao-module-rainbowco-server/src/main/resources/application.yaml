@@ -149,7 +149,7 @@ xxl:
 yudao:
   info:
     version: 1.0.0
-    base-package: cn.iocoder.yudao.module.matrix
+    base-package: cn.iocoder.yudao.module.rainbowco
   web:
     admin-ui:
       url: http://dashboard.yudao.iocoder.cn # Admin 管理后台 UI 的地址

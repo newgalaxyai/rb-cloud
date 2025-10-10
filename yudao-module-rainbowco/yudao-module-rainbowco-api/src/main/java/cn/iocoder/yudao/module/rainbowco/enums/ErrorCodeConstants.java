@@ -14,5 +14,5 @@ public interface ErrorCodeConstants {
     ErrorCode BIDDING_DOWNLOAD_NOT_EXISTS = new ErrorCode(1_001_000_002, "招标信息下载记录不存在");
     ErrorCode BIDDING_FAVORITE_NOT_EXISTS = new ErrorCode(1_001_000_003, "招标信息收藏不存在");
     ErrorCode BIDDING_HISTORY_NOT_EXISTS = new ErrorCode(1_001_000_004, "招标信息历史浏览记录不存在");
-
+    ErrorCode SUBSCRIBE_NOT_EXISTS = new ErrorCode(1_001_000_005, "订阅不存在");
 }

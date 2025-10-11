@@ -121,10 +121,10 @@ public class SubscribeController {
     @Operation(summary = "导入订阅")
     @Parameter(name = "file", description = "Excel 文件", required = true)
     @Parameter(name = "type", description = "类型", required = true)
-    public CommonResult<Boolean> importSubscribeExcel(@RequestParam("file") MultipartFile file,@RequestParam("type")Long type) throws Exception {
+    public CommonResult<cn.iocoder.yudao.framework.common.pojo.ImportResult> importSubscribeExcel(@RequestParam("file") MultipartFile file,@RequestParam("type")Long type) throws Exception {
         List<SubscribeImportExcelVO> list = ExcelUtils.read(file, SubscribeImportExcelVO.class);
-        subscribeService.importSubscribeList(list,type);
-        return success(true);
+        cn.iocoder.yudao.framework.common.pojo.ImportResult result = subscribeService.importSubscribeList(list,type);
+        return success(result);
     }
 
 }

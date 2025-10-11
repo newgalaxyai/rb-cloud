@@ -66,6 +66,6 @@ public interface SubscribeService {
      *
      * @param importList 导入数据列表
      */
-    void importSubscribeList(@Valid List<SubscribeImportExcelVO> importList,Long type);
+    cn.iocoder.yudao.framework.common.pojo.ImportResult importSubscribeList(@Valid List<SubscribeImportExcelVO> importList,Long type);
 
 }

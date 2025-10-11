@@ -82,19 +82,91 @@ public class SubscribeServiceImpl implements SubscribeService {
     }
 
     @Override
-    public void importSubscribeList(List<SubscribeImportExcelVO> importList,Long type) {
+    public cn.iocoder.yudao.framework.common.pojo.ImportResult importSubscribeList(List<SubscribeImportExcelVO> importList,Long type) {
         if (importList == null || importList.isEmpty()) {
-            return;
+            return cn.iocoder.yudao.framework.common.pojo.ImportResult.builder()
+                    .totalRows(0)
+                    .successRows(0)
+                    .failedRows(0)
+                    .status(cn.iocoder.yudao.framework.common.pojo.ImportStatus.SUCCESS)
+                    .errors(new java.util.ArrayList<>())
+                    .build();
         }
-        
-        for (SubscribeImportExcelVO importVO : importList) {
-            // 转换为DO对象
+
+        java.util.List<cn.iocoder.yudao.framework.common.pojo.ImportErrorDetail> errors = new java.util.ArrayList<>();
+        int successRows = 0;
+        int totalRows = importList.size();
+
+        for (int i = 0; i < importList.size(); i++) {
+            SubscribeImportExcelVO importVO = importList.get(i);
+            boolean hasError = false;
+            int rowIndex = i + 2; // Excel 第一行是表头，数据从第 2 行开始
+
+            // 校验订阅内容（非空 + 至少一个逗号）
+            if (importVO.getContents() == null || importVO.getContents().trim().isEmpty()) {
+                errors.add(cn.iocoder.yudao.framework.common.pojo.ImportErrorDetail.builder()
+                        .rowIndex(rowIndex)
+                        .columnIndex(1) // 订阅内容列
+                        .reason("订阅内容不能为空")
+                        .build());
+                hasError = true;
+            } else if (!importVO.getContents().contains(",")) {
+                errors.add(cn.iocoder.yudao.framework.common.pojo.ImportErrorDetail.builder()
+                        .rowIndex(rowIndex)
+                        .columnIndex(1) // 订阅内容列
+                        .reason("必须为逗号分隔的多项内容")
+                        .build());
+                hasError = true;
+            }
+
+            // 校验信息类型（非空 + 至少一个逗号）
+            if (importVO.getTypes() == null || importVO.getTypes().trim().isEmpty()) {
+                errors.add(cn.iocoder.yudao.framework.common.pojo.ImportErrorDetail.builder()
+                        .rowIndex(rowIndex)
+                        .columnIndex(2) // 信息类型列
+                        .reason("信息类型不能为空")
+                        .build());
+                hasError = true;
+            } else if (!importVO.getTypes().contains(",")) {
+                errors.add(cn.iocoder.yudao.framework.common.pojo.ImportErrorDetail.builder()
+                        .rowIndex(rowIndex)
+                        .columnIndex(2) // 信息类型列
+                        .reason("必须为逗号分隔的多项内容")
+                        .build());
+                hasError = true;
+            }
+
+            // 若存在错误，则跳过写库
+            if (hasError) {
+                continue;
+            }
+
+            // 转换为DO对象并入库
             SubscribeDO subscribe = BeanUtils.toBean(importVO, SubscribeDO.class);
             subscribe.setType(type);
             subscribe.setUserId(getLoginUserId());
-            // 插入数据
             subscribeMapper.insert(subscribe);
+
+            successRows++;
         }
+
+        int failedRows = totalRows - successRows;
+        cn.iocoder.yudao.framework.common.pojo.ImportStatus status;
+        if (failedRows == 0) {
+            status = cn.iocoder.yudao.framework.common.pojo.ImportStatus.SUCCESS;
+        } else if (successRows == 0) {
+            status = cn.iocoder.yudao.framework.common.pojo.ImportStatus.FAILED;
+        } else {
+            status = cn.iocoder.yudao.framework.common.pojo.ImportStatus.PARTIAL_SUCCESS;
+        }
+
+        return cn.iocoder.yudao.framework.common.pojo.ImportResult.builder()
+                .totalRows(totalRows)
+                .successRows(successRows)
+                .failedRows(failedRows)
+                .status(status)
+                .errors(errors)
+                .build();
     }
 
 }

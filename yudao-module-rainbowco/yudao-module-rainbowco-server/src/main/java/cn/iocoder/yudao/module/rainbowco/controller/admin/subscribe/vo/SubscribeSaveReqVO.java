@@ -14,6 +14,7 @@ public class SubscribeSaveReqVO {
 
     @Schema(description = "订阅内容（逗号拼接）", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "订阅内容（逗号拼接）不能为空")
+    @Pattern(regexp = "^[^,]+(,[^,]+)*$", message = "订阅内容格式不正确，多个内容请用逗号分隔")
     private String contents;
 
     @Schema(description = "信息类型（逗号拼接）", requiredMode = Schema.RequiredMode.REQUIRED)

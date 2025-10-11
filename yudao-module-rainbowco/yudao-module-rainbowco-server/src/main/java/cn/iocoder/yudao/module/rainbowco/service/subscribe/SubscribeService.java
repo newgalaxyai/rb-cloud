@@ -4,6 +4,7 @@ import java.util.*;
 
 import cn.iocoder.yudao.module.rainbowco.controller.admin.subscribe.vo.SubscribePageReqVO;
 import cn.iocoder.yudao.module.rainbowco.controller.admin.subscribe.vo.SubscribeSaveReqVO;
+import cn.iocoder.yudao.module.rainbowco.controller.admin.subscribe.vo.SubscribeImportExcelVO;
 import jakarta.validation.*;
 import cn.iocoder.yudao.module.rainbowco.dal.dataobject.subscribe.SubscribeDO;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
@@ -59,5 +60,12 @@ public interface SubscribeService {
      * @return 订阅分页
      */
     PageResult<SubscribeDO> getSubscribePage(SubscribePageReqVO pageReqVO);
+
+    /**
+     * 导入订阅列表
+     *
+     * @param importList 导入数据列表
+     */
+    void importSubscribeList(@Valid List<SubscribeImportExcelVO> importList,Long type);
 
 }

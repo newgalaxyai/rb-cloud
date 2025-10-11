@@ -18,7 +18,7 @@ public interface SubscribeMapper extends BaseMapperX<SubscribeDO> {
     default PageResult<SubscribeDO> selectPage(SubscribePageReqVO reqVO) {
         return selectPage(reqVO, new LambdaQueryWrapperX<SubscribeDO>()
                 .eqIfPresent(SubscribeDO::getContents, reqVO.getContents())
-                .eqIfPresent(SubscribeDO::getTypes, reqVO.getTypes())
+                .eqIfPresent(SubscribeDO::getType, reqVO.getType())
                 .eqIfPresent(SubscribeDO::getUserId, reqVO.getUserId())
                 .betweenIfPresent(SubscribeDO::getCreateTime, reqVO.getCreateTime())
                 .orderByDesc(SubscribeDO::getId));

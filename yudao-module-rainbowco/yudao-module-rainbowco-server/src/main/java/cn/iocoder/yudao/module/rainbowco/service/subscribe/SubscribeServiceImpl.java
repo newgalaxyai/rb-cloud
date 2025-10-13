@@ -102,38 +102,48 @@ public class SubscribeServiceImpl implements SubscribeService {
             boolean hasError = false;
             int rowIndex = i + 2; // Excel 第一行是表头，数据从第 2 行开始
 
-            // 校验订阅内容（非空 + 至少一个逗号）
-            if (importVO.getContents() == null || importVO.getContents().trim().isEmpty()) {
+            // 校验订阅内容（非空；如包含逗号则需至少两项且每项非空）
+            String contents = importVO.getContents();
+            if (contents == null || contents.trim().isEmpty()) {
                 errors.add(cn.iocoder.yudao.framework.common.pojo.ImportErrorDetail.builder()
                         .rowIndex(rowIndex)
                         .columnIndex(1) // 订阅内容列
                         .reason("订阅内容不能为空")
                         .build());
                 hasError = true;
-            } else if (!importVO.getContents().contains(",")) {
-                errors.add(cn.iocoder.yudao.framework.common.pojo.ImportErrorDetail.builder()
-                        .rowIndex(rowIndex)
-                        .columnIndex(1) // 订阅内容列
-                        .reason("必须为逗号分隔的多项内容")
-                        .build());
-                hasError = true;
+            } else if (contents.contains(",")) {
+                String[] parts = contents.split(",");
+                long nonEmptyCount = java.util.Arrays.stream(parts).map(String::trim).filter(s -> !s.isEmpty()).count();
+                if (nonEmptyCount < 2) {
+                    errors.add(cn.iocoder.yudao.framework.common.pojo.ImportErrorDetail.builder()
+                            .rowIndex(rowIndex)
+                            .columnIndex(1) // 订阅内容列
+                            .reason("订阅内容需为逗号分隔的多项内容，且各项不能为空")
+                            .build());
+                    hasError = true;
+                }
             }
 
-            // 校验信息类型（非空 + 至少一个逗号）
-            if (importVO.getTypes() == null || importVO.getTypes().trim().isEmpty()) {
+            // 校验信息类型（非空；如包含逗号则需至少两项且每项非空）
+            String typesStr = importVO.getTypes();
+            if (typesStr == null || typesStr.trim().isEmpty()) {
                 errors.add(cn.iocoder.yudao.framework.common.pojo.ImportErrorDetail.builder()
                         .rowIndex(rowIndex)
                         .columnIndex(2) // 信息类型列
                         .reason("信息类型不能为空")
                         .build());
                 hasError = true;
-            } else if (!importVO.getTypes().contains(",")) {
-                errors.add(cn.iocoder.yudao.framework.common.pojo.ImportErrorDetail.builder()
-                        .rowIndex(rowIndex)
-                        .columnIndex(2) // 信息类型列
-                        .reason("必须为逗号分隔的多项内容")
-                        .build());
-                hasError = true;
+            } else if (typesStr.contains(",")) {
+                String[] parts = typesStr.split(",");
+                long nonEmptyCount = java.util.Arrays.stream(parts).map(String::trim).filter(s -> !s.isEmpty()).count();
+                if (nonEmptyCount < 2) {
+                    errors.add(cn.iocoder.yudao.framework.common.pojo.ImportErrorDetail.builder()
+                            .rowIndex(rowIndex)
+                            .columnIndex(2) // 信息类型列
+                            .reason("信息类型需为逗号分隔的多项内容，且各项不能为空")
+                            .build());
+                    hasError = true;
+                }
             }
 
             // 若存在错误，则跳过写库
